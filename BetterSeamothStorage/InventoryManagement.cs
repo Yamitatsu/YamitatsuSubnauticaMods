@@ -8,77 +8,57 @@
     public class InventoryManagement : MonoBehaviour
     {
         public InventoryManagement Instance { get; private set; }
-        private Player PlayerMain;
-        private Vehicle ThisVehicle;
+        public Vehicle ThisVehicle;
         private PDA PdaMain;
-        internal bool isActive = false;
-        private bool isInVehicle = false;
+        private bool isActive; 
 
         internal void Awake()
         {
+            Console.WriteLine($"[BetterSeamothStorage:DEBUG] InventoryManagement Awakening.");
             Instance = GetComponent<InventoryManagement>();
+            Console.WriteLine(
+                $"[BetterSeamothStorage:DEBUG] Instance is now initialized with type {Instance.GetType().Name}.");
+            Console.WriteLine(
+                $"[BetterSeamothStorage:DEBUG] Instance has {Instance.gameObject.GetFullName()} for GameObject.");
             if (Instance.GetComponent<SeaMoth>())
             {
                 ThisVehicle = Instance.GetComponent<SeaMoth>();
+                Console.WriteLine(
+                    $"[BetterSeamothStorage:DEBUG] We have a Seamoth here, its type is {ThisVehicle.GetType().Name}.");
             }
             else if (Instance.GetComponent<Exosuit>())
             {
                 ThisVehicle = Instance.GetComponent<Exosuit>();
+                Console.WriteLine(
+                    $"[BetterSeamothStorage:DEBUG] We have a Prawn Suit here, its type is {ThisVehicle.GetType().Name}.");
             }
             else
             {
+                Console.WriteLine($"[BetterSeamothStorage:DEBUG] We have nothing here, Instance will be destroyed.");
                 Destroy(Instance);
             }
         }
 
         internal void Start()
         {
-            PlayerMain = Player.main;
-            PdaMain = PlayerMain.GetPDA();
+            Console.WriteLine($"[BetterSeamothStorage:DEBUG] Instance has just Started.");
+            Player.main.playerModeChanged.AddHandler(this, new Event<Player.Mode>.HandleFunction(OnPlayerModeChanged));
+            PdaMain = Player.main.GetPDA();
             PdaMain.Open();
             PdaMain.Close();
-            PlayerMain.playerModeChanged.AddHandler(this, new Event<Player.Mode>.HandleFunction(OnPlayerModeChanged));
-            isActive = PlayerMain.GetVehicle() == ThisVehicle;
+            isActive = Player.main.GetVehicle() == ThisVehicle;
         }
 
         private bool isPlayerInVehicle()
         {
-            var test = Player.main.inSeamoth || Player.main.inExosuit;
-            if (test != isInVehicle)
-            {
-                if (test == true)
-                {
-                    ErrorMessage.AddMessage("isInVehicle is now true");
-                }
-                else
-                {
-                    ErrorMessage.AddMessage("isInVehicle is now false");
-                }
-            }
-
-            isInVehicle = test;
-            return test;
+            return Player.main.inSeamoth || Player.main.inExosuit;
         }
 
         internal void OnPlayerModeChanged(Player.Mode playerMode)
         {
-            var getVehName = Player.main != null ? (Player.main.GetVehicle() != null ? Player.main.GetVehicle().GetName() : "Player.main.GetVeh = NULL") : "Player.main = NULL";
-            var thisVehName = ThisVehicle != null ? ThisVehicle.GetName() : "NULL";
-            ErrorMessage.AddMessage($"Player mode changed to {playerMode.ToString()}\nThisVehicule is {thisVehName}\nGetVehicule is {getVehName}");
-            var test = playerMode == Player.Mode.LockedPiloting && Player.main.GetVehicle() == ThisVehicle;
-            if (test != isActive)
-            {
-                if (test == true)
-                {
-                    ErrorMessage.AddMessage("isActive is now true");
-                }
-                else
-                {
-                    ErrorMessage.AddMessage("isActive is now false");
-                }
-            }
-
-            isActive = test;
+            ErrorMessage.AddMessage($"[BetterSeamothStorage:DEBUG] Player.main.GetVehicle = {( Player.main.GetVehicle() == null ? "Null" : Player.main.GetVehicle().GetName())}.");
+            ErrorMessage.AddMessage($"[BetterSeamothStorage:DEBUG] Player.main.currentMountedVehicle = {( Player.main.currentMountedVehicle == null ? "Null" : Player.main.currentMountedVehicle.GetName())}.");
+            isActive = playerMode == Player.Mode.LockedPiloting && Player.main.GetVehicle() == ThisVehicle;
         }
 
         internal void Update()
@@ -211,7 +191,7 @@
 
         public void OnDestroy()
         {
-            PlayerMain.playerModeChanged.RemoveHandler(this, OnPlayerModeChanged);
+            Player.main.playerModeChanged.RemoveHandler(this, OnPlayerModeChanged);
             Destroy(Instance);
         }
     }
