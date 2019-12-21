@@ -1,0 +1,13 @@
+﻿{
+  "Id": "BetterSeamothStorage",
+  "DisplayName": "Better Seamoth Storage",
+  "Author": "Yamitatsu",
+  "Version": "0.0.1",
+  "Enable": true,
+  "AssemblyName": "BetterSeamothStorage.dll",
+  "Game": "Subnautica",
+  "Dependencies": [
+    "SMLHelper"
+  ],
+  "EntryMethod": "BetterSeamothStorage.Main.Patch"
+}

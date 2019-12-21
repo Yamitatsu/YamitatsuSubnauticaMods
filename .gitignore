@@ -1,0 +1,15 @@
+[Bb]in/
+[Oo]bj/
+[Pp]ackages/
+
+/DependenciesSubnautica/Assembly-CSharp-firstpass.dll
+/DependenciesSubnautica/Assembly-CSharp.dll
+
+*.suo
+*.user
+.vs/
+_UpgradeReport_Files/
+
+Thumbs.db
+Desktop.ini
+.DS_Store
