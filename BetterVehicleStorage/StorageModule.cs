@@ -16,10 +16,8 @@
         {
             base.OnFinishedPatching += () =>
             {
-                YoLog.Debug($"Registering done with TechType");
                 CraftDataHandler.SetEquipmentType(this.TechType, EquipmentType.VehicleModule);
                 CraftDataHandler.SetQuickSlotType(this.TechType, QuickSlotType.Selectable);
-                YoLog.Debug($"Registering done with TechType {this.TechType.ToString()}");
             };
         }
 
