@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterSeamothStorage", "BetterSeamothStorage\BetterSeamothStorage.csproj", "{1D2112CF-048B-43E6-9598-24B3BA949B29}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterVehicleStorage", "BetterVehicleStorage\BetterVehicleStorage.csproj", "{A39952B3-93F8-41C1-A675-4743B643791F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities\Utilities.csproj", "{46054143-71F7-4A06-811E-C7D1F3D684B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{1D2112CF-048B-43E6-9598-24B3BA949B29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D2112CF-048B-43E6-9598-24B3BA949B29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D2112CF-048B-43E6-9598-24B3BA949B29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A39952B3-93F8-41C1-A675-4743B643791F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A39952B3-93F8-41C1-A675-4743B643791F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A39952B3-93F8-41C1-A675-4743B643791F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A39952B3-93F8-41C1-A675-4743B643791F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46054143-71F7-4A06-811E-C7D1F3D684B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46054143-71F7-4A06-811E-C7D1F3D684B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46054143-71F7-4A06-811E-C7D1F3D684B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46054143-71F7-4A06-811E-C7D1F3D684B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
