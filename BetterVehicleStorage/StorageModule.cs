@@ -7,10 +7,10 @@
 
     public abstract class StorageModule : Craftable
     {
-        public static int StorageWidth = 4;
-        public static int StorageHeight = 4;
-        public static bool ShouldBeTheOnlyOne = false;
-        public static bool OpenAllSlots = false;
+        public int StorageWidth = 4;
+        public int StorageHeight = 4;
+        public bool ShouldBeTheOnlyOne = false;
+        public bool OpenAllSlots = false;
         protected StorageModule(string classId, string friendlyName, string description)
             : base(classId, friendlyName, description)
         {
@@ -29,7 +29,7 @@
 
         public sealed override CraftTree.Type FabricatorType => CraftTree.Type.Workbench;
 
-        public sealed override string[] StepsToFabricatorTab => new[] { Main.WorkBenchTab };
+        public override string[] StepsToFabricatorTab => new[] { Main.WorkBenchTab };
 
         public sealed override string AssetsFolder => "BetterVehicleStorage/Assets";
 

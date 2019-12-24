@@ -13,7 +13,6 @@
         public static void Patch()
         {
             YoLog.Info("Patching started.");
-
             CraftTreeHandler.AddTabNode(
                 CraftTree.Type.Workbench,
                 WorkBenchTab,
@@ -21,7 +20,6 @@
                 SpriteManager.Get(TechType.VehicleStorageModule));
 
             StorageModuleMgr.RegisterModules();
-            StorageModuleMgr.PatchModules();
 
             var harmony = HarmonyInstance.Create("com.bettervehiclestorage.psmod");
             harmony.PatchAll(Assembly.GetExecutingAssembly());

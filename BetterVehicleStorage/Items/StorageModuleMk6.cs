@@ -19,6 +19,8 @@
             StorageModuleMk5TechType = storageModuleMk5TechType;
         }
 
+        public override string[] StepsToFabricatorTab => new[] { "SeamothMenu" };
+
         protected override TechData GetBlueprintRecipe()
         {
             return new TechData()
