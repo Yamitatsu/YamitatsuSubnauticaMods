@@ -9,15 +9,13 @@
     {
         public int StorageWidth = 4;
         public int StorageHeight = 4;
-        public bool ShouldBeTheOnlyOne = false;
-        public bool OpenAllSlots = false;
         protected StorageModule(string classId, string friendlyName, string description)
             : base(classId, friendlyName, description)
         {
             base.OnFinishedPatching += () =>
             {
                 CraftDataHandler.SetEquipmentType(this.TechType, EquipmentType.VehicleModule);
-                CraftDataHandler.SetQuickSlotType(this.TechType, QuickSlotType.Selectable);
+                CraftDataHandler.SetQuickSlotType(this.TechType, QuickSlotType.Instant);
             };
         }
 
@@ -25,7 +23,7 @@
 
         public sealed override TechCategory CategoryForPDA => TechCategory.VehicleUpgrades;
 
-        public sealed override TechType RequiredForUnlock => TechType.BaseUpgradeConsole;
+        public sealed override TechType RequiredForUnlock => TechType.Workbench;
 
         public sealed override CraftTree.Type FabricatorType => CraftTree.Type.Workbench;
 

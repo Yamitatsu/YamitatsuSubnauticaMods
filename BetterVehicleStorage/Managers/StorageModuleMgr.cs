@@ -1,22 +1,37 @@
 ﻿namespace BetterVehicleStorage.Managers
 {
+    using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Reflection;
     using Items;
+    using UnityEngine;
     using Utilities;
 
     public static class StorageModuleMgr
     {
         public static readonly IDictionary<TechType, StorageModule> Modules = new Dictionary<TechType, StorageModule>();
 
+        public static readonly IList<string> NeedMappingMethods = new List<string>()
+        {
+            "OnHandClick",
+            "OpenFromExternal",
+            "OpenPDA"
+        };
+
+        public static readonly IList<string> NeedFakeTechTypeMethods = new List<string>()
+        {
+            "RebuildVehicleScreen"
+        };
+
         public static void RegisterModules()
         {
             var storageModuleMk2TechType = RegisterModule(new StorageModuleMk2());
             var storageModuleMk3TechType = RegisterModule(new StorageModuleMk3(storageModuleMk2TechType));
             var storageModuleMk4TechType = RegisterModule(new StorageModuleMk4(storageModuleMk3TechType));
-            var storageModuleMk5TechType = RegisterModule(new StorageModuleMk5(storageModuleMk4TechType));
-            RegisterModule(new StorageModuleMk6(storageModuleMk5TechType));
+            RegisterModule(new StorageModuleMk5(storageModuleMk4TechType));
         }
 
         private static TechType RegisterModule(StorageModule storageModule)
@@ -26,129 +41,99 @@
             return storageModule.TechType;
         }
 
-        private static bool isStorageModule(TechType techType)
+        public static bool IsStorageModule(TechType techType)
         {
             return techType == TechType.VehicleStorageModule || Modules.ContainsKey(techType);
         }
 
-        private static bool isTardisModule(TechType techType)
+        public static bool IsTorpedoModule(TechType techType)
         {
-            return Modules.ContainsKey(techType) && Modules[techType].OpenAllSlots;
+            return techType == TechType.ExosuitTorpedoArmModule || techType == TechType.SeamothTorpedoModule;
         }
 
         public static void UpdateSeamothStorage(ref SeaMoth seaMoth, int slotId, TechType techType, bool added)
         {
-            YoLog.Debug("****************************************************************");
-            YoLog.Debug("UpdateSeamothStorage:Start");
-            YoLog.Debug("****************************************************************");
-            if (!isStorageModule(techType))
-            {
-                YoLog.Debug("Not a storage module.");
-                return;
-            }
-
-            var isTardis = isTardisModule(techType);
-            var moduleAdded = techType != TechType.VehicleStorageModule ? Modules[techType] : null;
+            if (!IsStorageModule(techType)) return;
             var physicalStorageModuleAmount = CalculateStorageModuleAmount(seaMoth.modules);
-            YoLog.Debug($"added = {added.ToString()}");
-            YoLog.Debug($"SlotId = {slotId.ToString()}");
-            YoLog.Debug($"isTardis = {isTardis.ToString()}");
-            YoLog.Debug($"physicalStorageModuleAmount = {physicalStorageModuleAmount.ToString()}");
             for (int i = 0; i < 4; i++)
             {
-                YoLog.Debug($"Processing slot {i} activation...");
                 //Storage activation
-                var enabled = i < physicalStorageModuleAmount || (isTardis && added);
+                var enabled = i < physicalStorageModuleAmount;
                 seaMoth.storageInputs[i].SetEnabled(enabled);
-                YoLog.Debug($"... slot {i} {(enabled ? "enabled" : "disabled")}.");
-                YoLog.Debug($"Processing slot {i} resizing...");
-                //Storage resizing
-                if (added && enabled)
-                {
-                    ItemsContainer itemsContainer = seaMoth.GetStorageInSlot(i, techType);
-                    if (itemsContainer == null)
-                    {
-                        YoLog.Debug($"... slot {i} itemContainer is null. Aborted.");
-                        continue;
-                    }
-
-                    itemsContainer.Resize(moduleAdded?.StorageWidth ?? 4, moduleAdded?.StorageHeight ?? 4);
-                    YoLog.Debug(
-                        $"... slot {i} resized to ({moduleAdded?.StorageWidth ?? 4};{moduleAdded?.StorageHeight ?? 4}).");
-                }
-
-                YoLog.Debug("UpdateSeamothStorage:End");
-                YoLog.Debug("****************************************************************");
             }
         }
 
-        internal static ItemsContainer GetStorageInSlot(Vehicle vehicle, int slotId)
+        public static void UpdateExosuitStorage(ref Exosuit exosuit, int slotId, TechType techType, bool added)
         {
-            YoLog.Debug("GetStorageInSlot:Start");
-            YoLog.Debug("****************************************************************");
-            YoLog.Debug("Mapping module slots with storage position.");
-            var allModules = vehicle.GetSlotBinding();
-            List<int> allStorageModules = new List<int>();
-            StorageModule tardisModule = null;
-            int tardisModuleSlot = -1;
+            if (!IsStorageModule(techType)) return;
+            UpdateExosuitStorageSize(ref exosuit);
+        }
+
+        public static void UpdateExosuitStorageSize(ref Exosuit exosuit)
+        {
+            var allModules = exosuit.GetSlotBinding();
+            TechType storageTechType = TechType.None;
             for (int i = 0; i < allModules.Length; i++)
             {
-                YoLog.Debug($"Mapping module slot {i.ToString()}.");
-                if (!isStorageModule(allModules[i])) continue;
-                YoLog.Debug($"Slot {i.ToString()} is a storage module.");
-                allStorageModules.Add(i);
-                YoLog.Debug($"Slot {i.ToString()} is mapped to {allStorageModules.Count - 1}.");
-                if (!isTardisModule(allModules[i])) continue;
-                tardisModule = Modules[allModules[i]];
-                tardisModuleSlot = allStorageModules.Count - 1;
+                if (!IsStorageModule(allModules[i])) continue;
+                storageTechType = allModules[i];
                 break;
             }
-            YoLog.Debug("Mapping module done with :");
-            for (int i = 0; i < allStorageModules.Count; i++)
-            {
-                YoLog.Debug($"[{i}] = {allStorageModules[i]}");
-            }
-            int mappedStorageSlot = allStorageModules.IndexOf(slotId);
-            YoLog.Debug($"Mapped storage module slot is {mappedStorageSlot.ToString()}.");
-            if (tardisModule != null)
-            {
-                YoLog.Debug($"Initializing Tardis Module...");
-                InventoryItem tardisInventoryItem = vehicle.GetSlotItem(tardisModuleSlot);
-                if (tardisInventoryItem != null)
-                {
-                    Pickupable tardisPickupable = tardisInventoryItem.item;
-                    SeamothStorageMultipleContainers seamothStorageMultipleContainers =
-                        tardisPickupable.GetComponent<SeamothStorageMultipleContainers>();
-                    if (seamothStorageMultipleContainers == null)
-                    {
-                        seamothStorageMultipleContainers =
-                            tardisPickupable.gameObject.AddComponent<SeamothStorageMultipleContainers>();
-                    }
 
-                    return seamothStorageMultipleContainers == null || mappedStorageSlot == -1
-                        ? null
-                        : seamothStorageMultipleContainers.Containers[mappedStorageSlot];
+            if (storageTechType == TechType.None)
+            {
+                exosuit.storageContainer.Resize(4, 4);
+                return;
+            }
+
+            ;
+            var module = Modules.ContainsKey(storageTechType) ? Modules[storageTechType] : null;
+            exosuit.storageContainer.Resize(module?.StorageWidth ?? 6, module?.StorageHeight ?? 4);
+        }
+
+        internal static ItemsContainer GetStorageInSlot(ref Vehicle vehicle, int slotId, TechType techType,
+            string callingMethodName)
+        {
+            var allModules = vehicle.GetSlotBinding();
+            int mappedStorageSlot = slotId;
+            if (NeedMappingMethods.Contains(callingMethodName))
+            {
+                List<int> allStorageModules = new List<int>();
+                for (int i = 0; i < allModules.Length; i++)
+                {
+                    if (!IsStorageModule(allModules[i])) continue;
+                    allStorageModules.Add(i);
                 }
 
-                YoLog.Debug("GetStorageInSlot:End");
-                YoLog.Debug("****************************************************************");
-                return null;
+                mappedStorageSlot = allStorageModules[slotId];
             }
 
-            InventoryItem storageInventoryItem = vehicle.GetSlotItem(slotId);
-            if (storageInventoryItem == null) return null;
-            Pickupable storagePickupable = storageInventoryItem.item;
-            SeamothStorageContainer seamothStorageContainer =
-                storagePickupable.gameObject.GetComponent<SeamothStorageContainer>();
-            YoLog.Debug("GetStorageInSlot:End");
-            YoLog.Debug("****************************************************************");
-            return seamothStorageContainer == null ? null : seamothStorageContainer.container;
+            InventoryItem inventoryItem = vehicle.GetSlotItem(mappedStorageSlot);
+            return GetItemsContainerFromIventoryItem(inventoryItem, allModules[mappedStorageSlot]);
+        }
+
+        public static void fixOnResize(ref uGUI_ItemsContainer itemsContainer, int width, int height)
+        {
+            if (height == 10)
+                itemsContainer.rectTransform.anchoredPosition =
+                    new Vector2(itemsContainer.rectTransform.anchoredPosition.x, -55f);
+        }
+
+        private static ItemsContainer GetItemsContainerFromIventoryItem(InventoryItem inventoryItem, TechType techType)
+        {
+            if (inventoryItem == null) return null;
+            var module = Modules.ContainsKey(techType) ? Modules[techType] : null;
+            Pickupable pickupable = inventoryItem.item;
+            SeamothStorageContainer storageContainer = pickupable.GetComponent<SeamothStorageContainer>();
+            if (storageContainer == null) return null;
+            ItemsContainer itemsContainer = storageContainer.container;
+            itemsContainer.Resize(module?.StorageWidth ?? 4, module?.StorageHeight ?? 4);
+            return itemsContainer;
         }
 
         internal static bool IsAllowedToRemove(SeaMoth seaMoth, Pickupable pickupable, bool verbose)
         {
-            if (pickupable.GetTechType() != TechType.VehicleStorageModule &&
-                !Modules.ContainsKey(pickupable.GetTechType())) return true;
+            if (!IsStorageModule(pickupable.GetTechType())) return true;
             SeamothStorageContainer component = pickupable.GetComponent<SeamothStorageContainer>();
             if (component == null) return true;
             var flag = component.container.count == 0;
@@ -160,16 +145,107 @@
             return flag;
         }
 
+        internal static bool IsAllowedToRemoveFromExosuit(Exosuit exosuit, Pickupable pickupable, bool verbose)
+        {
+            if (!IsStorageModule(pickupable.GetTechType())) return true;
+            var flag = exosuit.storageContainer.container.count == 0;
+            if (verbose && !flag)
+            {
+                ErrorMessage.AddDebug("Storage must be empty in order to upgrade it.");
+            }
+
+            return flag;
+        }
+
         internal static bool AllowedToAdd(Equipment equipment, string slot, Pickupable pickupable, bool verbose,
             ref bool __result)
         {
-            var moduleToAdd = Modules.ContainsKey(pickupable.GetTechType()) ? Modules[pickupable.GetTechType()] : null;
-            if (moduleToAdd == null || !moduleToAdd.OpenAllSlots) return true;
-            if (CalculateStorageModuleAmount(equipment) <= 0) return true;
+            var isSeaMoth = equipment.owner.GetComponent<SeaMoth>() != null;
+            var isExosuit = equipment.owner.GetComponent<Exosuit>() != null;
+            if (!IsStorageModule(pickupable.GetTechType())) return true;
+            if (isSeaMoth && CalculateStorageModuleAmount(equipment) < 4) return true;
+            if (isExosuit && CalculateStorageModuleAmount(equipment) == 0) return true;
             __result = false;
-            ErrorMessage.AddError(
-                "The Tardis Module is not compatible with other storage modules.\nPlease, remove all storage modules before adding this one.");
+            if (verbose && isSeaMoth)
+            {
+                ErrorMessage.AddError(
+                    "You can only equip up to 4 storage modules.");
+            }
+            else if (verbose && isExosuit)
+            {
+                ErrorMessage.AddError(
+                    "You can only equip 1 storage module.");
+            }
+
             return false;
+        }
+
+        internal static bool GetTechTypeInSlot(Equipment equipment, string slot, ref TechType __result,
+            string callingMethodName)
+        {
+            if (!NeedFakeTechTypeMethods.Contains(callingMethodName)) return true;
+            var isSeaMoth = equipment.owner.GetComponent<SeaMoth>() != null;
+            if (!isSeaMoth) return true;
+            var allModules = equipment.GetEquipment();
+            List<string> slotNames = new List<string>()
+            {
+                "SeamothModule1",
+                "SeamothModule2",
+                "SeamothModule3",
+                "SeamothModule4"
+            };
+            List<string> allStorageModules = new List<string>();
+            while (allModules.MoveNext())
+            {
+                var module = allModules.Current;
+                if (module.Value == null || module.Value.item == null ||
+                    !IsStorageModule(module.Value.item.GetTechType())) continue;
+                allStorageModules.Add(module.Key);
+            }
+
+            if (slotNames.IndexOf(slot) >= allStorageModules.Count)
+            {
+                __result = TechType.None;
+                return false;
+            }
+
+            string mappedStorageSlot = allStorageModules[slotNames.IndexOf(slot)];
+            InventoryItem itemInSlot = equipment.GetItemInSlot(mappedStorageSlot);
+            if (itemInSlot == null || itemInSlot.item == null)
+            {
+                __result = TechType.None;
+                return false;
+            }
+
+            Pickupable item = itemInSlot.item;
+            if (IsStorageModule(item.GetTechType()))
+            {
+                __result = TechType.VehicleStorageModule;
+                return false;
+            }
+
+            __result = TechType.None;
+            return false;
+        }
+
+        internal static void OnUpgradeModuleUse(SeaMoth seaMoth, TechType techType, int slotId)
+        {
+            if (!IsStorageModule(techType)) return;
+            var slotItem = seaMoth.GetSlotItem(slotId);
+            var itemsContainer = GetItemsContainerFromIventoryItem(slotItem, techType);
+            PDA pda = Player.main.GetPDA();
+            Inventory.main.SetUsedStorage(itemsContainer);
+            pda.Open(PDATab.Inventory);
+        }
+
+        internal static void OnUpgradeModuleUseFromExosuit(Exosuit exosuit, TechType techType, int slotId)
+        {
+            if (!IsStorageModule(techType)) return;
+            var slotItem = exosuit.GetSlotItem(slotId);
+            var itemsContainer = exosuit.storageContainer.container;
+            PDA pda = Player.main.GetPDA();
+            Inventory.main.SetUsedStorage(itemsContainer);
+            pda.Open(PDATab.Inventory);
         }
 
         private static int CalculateStorageModuleAmount(Equipment equipment)

@@ -2,12 +2,15 @@
   "Id": "BetterVehicleStorage",
   "DisplayName": "Better Vehicle Storage",
   "Author": "Yamitatsu",
-  "Version": "0.0.1",
+  "Version": "1.0.0",
   "Enable": true,
   "AssemblyName": "BetterVehicleStorage.dll",
   "Game": "Subnautica",
   "Dependencies": [
     "SMLHelper"
+  ],
+  "LoadAfter" : [
+    "CustomizedStorage"
   ],
   "EntryMethod": "BetterVehicleStorage.Main.Patch"
 }

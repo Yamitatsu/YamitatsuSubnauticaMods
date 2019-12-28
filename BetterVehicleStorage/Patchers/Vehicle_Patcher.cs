@@ -1,5 +1,6 @@
 ﻿namespace BetterVehicleStorage.Patchers
 {
+    using System.Diagnostics;
     using Harmony;
     using Managers;
     using Utilities;
@@ -9,9 +10,11 @@
     internal class Vehicle_GetStorageInSlot_Patcher
     {
         [HarmonyPrefix]
-        internal static bool Prefix(Vehicle __instance, int slotID, ref ItemsContainer __result)
+        internal static bool Prefix(Vehicle __instance, int slotID, TechType techType, ref ItemsContainer __result)
         {
-            __result = StorageModuleMgr.GetStorageInSlot(__instance, slotID);
+            if (!StorageModuleMgr.IsStorageModule(techType)) return true;
+            var callingMethodName = new StackFrame(2).GetMethod().Name;
+            __result = StorageModuleMgr.GetStorageInSlot(ref __instance, slotID, techType, callingMethodName);
             return false;
         }
     }

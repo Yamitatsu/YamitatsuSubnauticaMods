@@ -20,8 +20,10 @@
                 SpriteManager.Get(TechType.VehicleStorageModule));
 
             StorageModuleMgr.RegisterModules();
+            
+            CraftDataHandler.SetQuickSlotType(TechType.VehicleStorageModule, QuickSlotType.Instant);
 
-            var harmony = HarmonyInstance.Create("com.bettervehiclestorage.psmod");
+            var harmony = HarmonyInstance.Create("Yamitatsu.BetterVehicleStorage");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             YoLog.Info("Patching done.");
