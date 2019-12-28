@@ -25,8 +25,9 @@
                 Ingredients = new List<Ingredient>
                 {
                     new Ingredient(StorageModuleMk2TechType, 1),
-                    new Ingredient(TechType.Titanium, 3),
-                    new Ingredient(TechType.Lithium, 1),
+                    new Ingredient(TechType.WiringKit, 1),
+                    new Ingredient(TechType.AluminumOxide, 3),
+                    new Ingredient(TechType.AramidFibers, 1)
                 }
             };
         }
