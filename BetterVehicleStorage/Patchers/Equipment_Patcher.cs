@@ -37,7 +37,6 @@
         [HarmonyPostfix]
         internal static void Postfix(ref uGUI_ItemsContainer __instance, int width, int height)
         {
-            YoLog.Debug($"OnResize called with {width.ToString()};{height.ToString()}");
             StorageModuleMgr.fixOnResize(ref __instance, width, height);
         }
     }
