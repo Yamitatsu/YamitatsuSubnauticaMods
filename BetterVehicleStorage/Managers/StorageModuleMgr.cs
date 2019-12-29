@@ -53,7 +53,6 @@
 
         public static void UpdateSeamothStorage(ref SeaMoth seaMoth, int slotId, TechType techType, bool added)
         {
-            if (!IsStorageModule(techType)) return;
             var physicalStorageModuleAmount = CalculateStorageModuleAmount(seaMoth.modules);
             for (int i = 0; i < 4; i++)
             {
