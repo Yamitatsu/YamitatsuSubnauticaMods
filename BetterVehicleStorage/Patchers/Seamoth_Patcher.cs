@@ -2,7 +2,6 @@
 {
     using Harmony;
     using Managers;
-    using Utilities;
 
     [HarmonyPatch(typeof(SeaMoth))]
     [HarmonyPatch("OnUpgradeModuleChange")]

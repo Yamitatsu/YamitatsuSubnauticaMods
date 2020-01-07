@@ -12,7 +12,6 @@
 
         public static void Patch()
         {
-            YoLog.Info("Patching started.");
             CraftTreeHandler.AddTabNode(
                 CraftTree.Type.Workbench,
                 WorkBenchTab,
@@ -25,8 +24,6 @@
 
             var harmony = HarmonyInstance.Create("Yamitatsu.BetterVehicleStorage");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-
-            YoLog.Info("Patching done.");
         }
     }
 }
